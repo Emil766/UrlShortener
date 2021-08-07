@@ -1,0 +1,14 @@
+{
+  "Serilog": {
+    "MinimumLevel": "Debug", //Verbose, Debug, Information, Warning, Error, Fatal
+    "WriteTo": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "c:\\temp\\UrlShortener.API\\UrlShortener.API-.log",
+          "rollingInterval": "Day"
+        }
+      }
+    ]
+  }
+}

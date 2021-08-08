@@ -27,14 +27,7 @@ namespace ILive.ParkCloud.API.Middleware
             }
             catch (Exception ex)
             {
-                if (Guid.TryParse(context.Request.Headers["RequestId"], out var requestId))
-                {
-                    _logger.Error(ex, $"Internal Error. RequestId : {requestId}");
-                }
-                else
-                {
-                    _logger.Error(ex, "Internal Error");
-                }
+                _logger.Error(ex, "Internal Error");
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }
         }

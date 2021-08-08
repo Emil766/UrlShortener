@@ -1,4 +1,5 @@
 using Autofac;
+using AutoMapper;
 using ILive.ParkCloud.API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,7 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
+using Repository.Interfaces.Interfaces;
+using Repository.MongoDB.Configuration;
+using Repository.MongoDB.Implementation;
 using Serilog;
+using Services.Configuration;
 using Services.Implementations;
 using Services.Interfaces;
 using System.IO;
@@ -72,6 +78,25 @@ namespace UrlShortener
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
+            var mapper = new MapperConfiguration(x => x.AddProfile<MappingProfile.MappingProfile>()).CreateMapper();
+
+            builder.RegisterInstance(mapper).As<IMapper>().SingleInstance();
+
+            var mongoUrl = new MongoUrl(Configuration.GetValue<string>("MongoUrl"));
+            var client = new MongoClient(mongoUrl);
+            var mongoDatabase = client.GetDatabase(Configuration.GetValue<string>("MongoDBName"));
+            builder.RegisterInstance(mongoDatabase).As<IMongoDatabase>().SingleInstance();
+            builder.RegisterInstance(client).As<IMongoClient>().SingleInstance();
+
+            var mongoCollections = Configuration.GetSection("MongoCollections").Get<MongoCollections>();
+            builder.RegisterInstance(mongoCollections);
+
+            var appBaseUrl = Configuration.GetSection("AppBaseUrl").Get<string>();
+            var shortenerServiceConfig = new ShortenerServiceConfig { SelfBaseUrl = appBaseUrl };
+            builder.RegisterInstance(shortenerServiceConfig);
+
+            builder.RegisterType<ShortUrlRepository>().As<IShortUrlRepository>();
+
             builder.RegisterType<ShortenerService>().As<IShortenerService>();
         }
     }

@@ -25,7 +25,7 @@ namespace Services.Interfaces
         /// <summary>
         /// Метод получения ссылки по идентификатору укороченной
         /// </summary>
-        /// <param name="id">Идекнтфиикатор укороченной ссылки</param>
+        /// <param name="id">Идентфиикатор укороченной ссылки</param>
         /// <returns>Длинная (исходная) ссылка</returns>
         Task<ServiceResult<string>> GetLongUrlByIdAsync(string id);
     }

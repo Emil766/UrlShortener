@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Models;
+using Models.Helpers;
 using Models.ServiceModels.Shortener;
 using Repository.Interfaces.Interfaces;
 using Serilog;
@@ -13,18 +14,15 @@ namespace Services.Implementations
 {
     public class ShortenerService : IShortenerService
     {
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IShortUrlRepository _shortUrlRepository;
         private readonly ShortenerServiceConfig _shortenerServiceConfig;
 
         public ShortenerService(
-            ILogger logger,
             IMapper mapper,
             IShortUrlRepository shortUrlRepository,
             ShortenerServiceConfig shortenerServiceConfig)
         {
-            _logger = logger;
             _mapper = mapper;
             _shortUrlRepository = shortUrlRepository;
             _shortenerServiceConfig = shortenerServiceConfig;
@@ -43,6 +41,11 @@ namespace Services.Implementations
 
         public async Task<ServiceResult<string>> GetShortUrlAsync(string longUrl)
         {
+            if (!UrlValidatorHelper.UrlStringIsValid(longUrl))
+            {
+                return ServiceResult<string>.BadRequest();
+            }
+
             var existedShortUrlId = await _shortUrlRepository.ExistAsync(longUrl);
             if (!string.IsNullOrEmpty(existedShortUrlId))
             {

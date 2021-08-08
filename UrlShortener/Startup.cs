@@ -10,6 +10,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Repository.Interfaces.Interfaces;
+using Repository.MongoDB;
 using Repository.MongoDB.Configuration;
 using Repository.MongoDB.Implementation;
 using Serilog;
@@ -45,7 +46,7 @@ namespace UrlShortener
                 opt.SwaggerDoc("v1", new OpenApiInfo { Title = "UrlShortener.API", Version = "v1", });
                 var basePath = PlatformServices.Default.Application.ApplicationBasePath;
                 var xmlPath = Path.Combine(basePath, "UrlShortener.API.xml");
-                //opt.IncludeXmlComments(xmlPath);
+                opt.IncludeXmlComments(xmlPath);
             });
         }
 
@@ -90,6 +91,8 @@ namespace UrlShortener
 
             var mongoCollections = Configuration.GetSection("MongoCollections").Get<MongoCollections>();
             builder.RegisterInstance(mongoCollections);
+
+            MongoCollectionsInitializer.InitializeCollections(mongoDatabase, mongoCollections);
 
             var appBaseUrl = Configuration.GetSection("AppBaseUrl").Get<string>();
             var shortenerServiceConfig = new ShortenerServiceConfig { SelfBaseUrl = appBaseUrl };
